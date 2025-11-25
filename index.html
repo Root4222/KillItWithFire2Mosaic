@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>777x77 Pixel Grid with Supabase</title>
+<title>Kill it With Fire 2 Mosaic</title>
 <style>
 body { background:#111; color:white; font-family:Arial; margin:20px; }
 #pixelCanvas { border:1px solid #444; image-rendering: pixelated; cursor: crosshair; }
@@ -16,8 +16,22 @@ button { background:#444; cursor:pointer; font-weight:bold; }
 <body>
 
 
-<h2>777 × 77 Pixel Grid (Supabase)</h2>
 
+<h2> What we know so far</h2>
+There are 12 locations where runes can spawn, shown below : <br>
+<img src="./img/Rune_Cheatsheet.png"><br>
+Bringing a blue torch to those spot will reveal symbols (The number of and symbols are random per player), 4 of each will be colored<br>
+Each Symbol corresponds to a number, delimited by the number of bump on that seal in the portal in front of the spider god's door, as shown below : <br>
+<img src="./img/symbolNumbers.png"><br>
+With this in mind, each colored rune is actually an X/Y coordinate and a color : <br>
+<img src="./img/symbolCoordinate.png"><br>
+The current theory is that by plotting these symbols, we can get an image that will help us unlock the "Cheat Code" item<br>
+
+
+
+
+<h2>Kill it With Fire 2 Mosaic</h2>
+For each of your colored Runes, enter the X and Y coordinate of the pixel, along with the color, and press "Submit"<br>
 
 <canvas id="pixelCanvas" width="777" height="77"></canvas>
 
@@ -30,6 +44,7 @@ button { background:#444; cursor:pointer; font-weight:bold; }
 <option value="#0000ff">Blue</option>
 <option value="#00ff00">Green</option>
 <option value="#ff69b4">Pink</option>
+<option value="#FFA500">Orange</option>
 <option value="#800080">Purple</option>
 <option value="#ffffff">White</option>
 <option value="#ffff00">Yellow</option>
