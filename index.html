@@ -7,95 +7,128 @@
 body { background:#111; color:white; font-family:Arial; margin:20px; }
 #pixelCanvas { border:1px solid #444; image-rendering: pixelated; cursor: crosshair; }
 .panel { margin-top:20px; padding:15px; background:#222; border-radius:8px; width:420px; }
-input, select, button { width:100%; padding:8px; margin-top:8px; border-radius:6px; border:1px solid #555; background:#333; color:white; }
+input, select, button { width:100%; padding:6px; margin-top:8px; border-radius:6px; border:1px solid #555; background:#333; color:white; }
 button { background:#444; cursor:pointer; font-weight:bold; }
+.color-container { display: flex; align-items: center; gap: 10px; }
+.color-preview { display:inline-block; width:20px; height:20px; border:1px solid #555; }
 </style>
 </head>
 <body>
 
+
 <h2>777 × 77 Pixel Grid (Supabase)</h2>
+
 
 <canvas id="pixelCanvas" width="777" height="77"></canvas>
 
+
 <div class="panel">
 <label>Color:</label>
+<div class="color-container">
 <select id="colorSelect">
-  <option value="#ff0000">Red</option>
-  <option value="#0000ff">Blue</option>
-  <option value="#00ff00">Green</option>
-  <option value="#ff69b4">Pink</option>
-  <option value="#800080">Purple</option>
-  <option value="#ffffff">White</option>
-  <option value="#ffff00">Yellow</option>
+<option value="#ff0000">Red</option>
+<option value="#0000ff">Blue</option>
+<option value="#00ff00">Green</option>
+<option value="#ff69b4">Pink</option>
+<option value="#800080">Purple</option>
+<option value="#ffffff">White</option>
+<option value="#ffff00">Yellow</option>
 </select>
+<span class="color-preview" id="colorPreview"></span>
+</div>
+
 
 <label for="xInput">X:</label>
 <input id="xInput" type="number" min="0" max="776">
 
+
 <label for="yInput">Y:</label>
 <input id="yInput" type="number" min="0" max="76">
+
 
 <button id="submitBtn">Submit Pixel</button>
 </div>
 
+
 <!-- Supabase JS -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.34.0/dist/umd/supabase.min.js"></script>
 <script>
 const W = 777, H = 77;
 const canvas = document.getElementById("pixelCanvas");
 const ctx = canvas.getContext("2d");
 
+
 const colorSelect = document.getElementById("colorSelect");
+const colorPreview = document.getElementById("colorPreview");
 const xInput = document.getElementById("xInput");
 const yInput = document.getElementById("yInput");
 const submitBtn = document.getElementById("submitBtn");
+
 
 // Fill black background
 ctx.fillStyle = "#000";
 ctx.fillRect(0,0,W,H);
 
+
+// Show initial color
+colorPreview.style.backgroundColor = colorSelect.value;
+colorSelect.addEventListener('change', ()=>{
+colorPreview.style.backgroundColor = colorSelect.value;
+});
+
+
 // --- Supabase setup ---
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
-const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = "https://uqsulkecdpzwacktcwut.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxc3Vsa2VjZHB6d2Fja3Rjd3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwOTgxMjEsImV4cCI6MjA3OTY3NDEyMX0.-4safUVuOJayX_D15q1GmPYiHVSzIW2Zmc833o303W8";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 
 // Load all pixels from Supabase
 async function loadPixels() {
-    const { data, error } = await supabase.from("pixels").select("*");
-    if(error){ console.error(error); return; }
-    data.forEach(p => {
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, 1, 1);
-    });
+const { data, error } = await supabaseClient.from("pixels").select("*");
+if(error){ console.error(error); return; }
+data.forEach(p => {
+ctx.fillStyle = p.color;
+ctx.fillRect(p.x, p.y, 1, 1);
+});
 }
 loadPixels();
 
-// Submit a pixel
+
+// Submit a pixel using RLS-compatible upsert
 submitBtn.onclick = async () => {
-    const x = parseInt(xInput.value);
-    const y = parseInt(yInput.value);
-    const color = colorSelect.value;
+const x = parseInt(xInput.value);
+const y = parseInt(yInput.value);
+const color = colorSelect.value;
 
-    if(isNaN(x) || isNaN(y) || x<0||x>=W||y<0||y>=H){
-        alert("Invalid coordinates");
-        return;
-    }
 
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, 1, 1);
+if(isNaN(x) || isNaN(y) || x<0||x>=W||y<0||y>=H){
+alert("Invalid coordinates");
+return;
+}
 
-    // Upsert pixel in Supabase
-    const { error } = await supabase.from("pixels").upsert({x,y,color});
-    if(error) console.error(error);
+
+ctx.fillStyle = color;
+ctx.fillRect(x, y, 1, 1);
+
+
+// Upsert requires (x,y) as primary key in the table
+const { data, error } = await supabaseClient
+.from("pixels")
+.upsert({ x, y, color }, { onConflict: ['x','y'] });
+
+
+if(error) console.error("Supabase upsert error:", error);
 };
 
-// Optional: subscribe to realtime updates
-supabase.channel('realtime-pixels')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'pixels' }, payload => {
-      const p = payload.new;
-      ctx.fillStyle = p.color;
-      ctx.fillRect(p.x, p.y, 1, 1);
-  }).subscribe();
+
+// Optional: subscribe to realtime updates (requires Realtime enabled on table)
+supabaseClient.channel('realtime-pixels')
+.on('postgres_changes', { event: '*', schema: 'public', table: 'pixels' }, payload => {
+const p = payload.new;
+ctx.fillStyle = p.color;
+ctx.fillRect(p.x, p.y, 1, 1);
+}).subscribe();
 </script>
 </body>
 </html>
