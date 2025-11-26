@@ -1,177 +1,317 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Kill it With Fire 2 Mosaic</title>
-<style>
-body { background:#111; color:white; font-family:Arial; margin:20px; }
-canvas { border:1px solid #444; image-rendering: pixelated; display:block; margin-bottom:20px; }
-.panel { margin-top:20px; padding:15px; background:#222; border-radius:8px; width:420px; }
-input, select, button { width:100%; padding:6px; margin-top:8px; border-radius:6px; border:1px solid #555; background:#333; color:white; }
-button { background:#444; cursor:pointer; font-weight:bold; }
-.color-container { display: flex; align-items: center; gap: 10px; }
-.color-preview { display:inline-block; width:20px; height:20px; border:1px solid #555; }
-</style>
+	<meta charset="UTF-8">
+	<title>Kill it With Fire 2 Mosaic</title>
+	<style>
+		body {
+			background: #111;
+			color: white;
+			font-family: Arial;
+			margin: 20px;
+		}
+
+		canvas {
+			border: 1px solid #444;
+			image-rendering: pixelated;
+			display: block;
+			margin-bottom: 20px;
+		}
+
+		.panel {
+			margin-top: 20px;
+			padding: 15px;
+			background: #222;
+			border-radius: 8px;
+			width: 420px;
+		& input,
+		select,
+		button {
+			width: 100%;
+			padding: 6px;
+			margin-top: 8px;
+			border-radius: 6px;
+			border: 1px solid #555;
+			background: #333;
+			color: white;
+		}
+
+		& button {
+			background: #444;
+			cursor: pointer;
+			font-weight: bold;
+		}
+		}
+
+
+		.color-container {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.color-preview {
+			display: inline-block;
+			width: 20px;
+			height: 20px;
+			border: 1px solid #555;
+		}
+		.keaypad-wrapper{
+			display: flex;
+			flex-direction: column;
+			width: fit-content;
+			gap: 0.5rem;
+			padding: 0.5rem;
+			padding: 1rem;
+			border-radius: 15px;
+			background-color: #222;
+			
+			&>input {
+				width: 1fr;
+				padding: 0.5rem;
+				font-size: 1.2rem;
+				border-radius: 10px;
+				border: 1px solid #555;
+				background-color: #333;
+				color: white;
+				overflow: scroll;
+			}
+			margin: 15px;
+		}
+		.rune-keypad {
+			display: grid;
+			grid-template-columns: repeat(3, auto);
+			width: fit-content;
+			gap: 0.2rem;
+			
+
+
+			&>button {
+				height: 6rem;
+				width: 6rem;
+				aspect-ratio: 1;
+				font-size: 1.5rem;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				padding: 0.1rem;
+				background-color: #333;
+				border-style: none;
+
+				&>img {
+					pointer-events: none;
+					aspect-ratio: 1;
+					height: 100%;
+				}
+				&:hover {
+					background-color: #444;
+
+					&>img {
+						filter: brightness(1.2);
+					}
+				}
+				&:active {
+					background-color: #555;
+
+					&>img {
+						filter: brightness(0.8);
+					}
+				}
+			}
+
+		}
+	</style>
 </head>
+
 <body>
 
 
 
-<h2> What we know so far</h2>
-There are 12 locations where runes can spawn, shown below : <br>
-<img src="./img/Rune_Cheatsheet.png"><br>
-Bringing a blue torch to those spot will reveal symbols (The number of and symbols are random per player), some of which will be colored<br>
-<img src="./img/blueTorch.png" width="500px" height="200px"><br>
-Each Symbol corresponds to a number, delimited by the number of bump on that seal in the portal in front of the spider god's door, as shown below : <br>
-<img src="./img/symbolNumbers.png" width="500px" height="300px"><br>
-With this in mind, each colored rune is actually an X/Y coordinate and a color : <br>
-<img src="./img/symbolCoordinate.png" width="500px" height="200px"><br>
-The current theory is that by plotting these symbols, we can get an image that will help us unlock the "Cheat Code" item<br>
+	<h2> What we know so far</h2>
+	There are 12 locations where runes can spawn, shown below : <br>
+	<img src="./img/Rune_Cheatsheet.png"><br>
+	Bringing a blue torch to those spot will reveal symbols (The number of and symbols are random per player), some of
+	which will be colored<br>
+	<img src="./img/blueTorch.png" width="500px" height="200px"><br>
+	Each Symbol corresponds to a number, delimited by the number of bump on that seal in the portal in front of the
+	spider god's door, as shown below : <br>
+	<img src="./img/symbolNumbers.png" width="500px" height="300px"><br>
+	With this in mind, each colored rune is actually an X/Y coordinate and a color : <br>
+	<img src="./img/symbolCoordinate.png" width="500px" height="200px"><br>
+	The current theory is that by plotting these symbols, we can get an image that will help us unlock the "Cheat Code"
+	item<br>
 
 
 
 
-<h2>Kill it With Fire 2 Mosaic</h2>
-For each of your Runes (including black), enter the X and Y coordinate of the pixel, along with the color, and press "Submit"<br>
+	<h2>Kill it With Fire 2 Mosaic</h2>
+	For each of your Runes (including black), enter the X and Y coordinate of the pixel, along with the color, and press
+	"Submit"<br>
 
-<canvas id="pixelCanvas" width="777" height="77"></canvas>
-
-
-<div class="panel">
-<label>Color:</label>
-<div class="color-container">
-<select id="colorSelect">
-<option value="#ff0000">Red</option>
-<option value="#A52A2A">Brown</option>
-<option value="#FFA500">Orange</option>
-<option value="#ffff00">Yellow</option>
-<option value="#00ff00">Green</option>
-<option value="#0000ff">Blue</option>
-<option value="#800080">Purple</option>
-<option value="#000000">Black</option>
-<option value="#ffffff">White</option>
-
-</select>
-<span class="color-preview" id="colorPreview"></span>
-</div>
+	<canvas id="pixelCanvas" width="777" height="77"></canvas>
 
 
-<label for="xInput">X:</label>
-<input id="xInput" type="number" min="0" max="776">
+	<div class="panel">
+		<label>Color:</label>
+		<div class="color-container">
+			<select id="colorSelect">
+				<option value="#ff0000">Red</option>
+				<option value="#A52A2A">Brown</option>
+				<option value="#FFA500">Orange</option>
+				<option value="#ffff00">Yellow</option>
+				<option value="#00ff00">Green</option>
+				<option value="#0000ff">Blue</option>
+				<option value="#800080">Purple</option>
+				<option value="#000000">Black</option>
+				<option value="#ffffff">White</option>
+
+			</select>
+			<span class="color-preview" id="colorPreview"></span>
+		</div>
 
 
-<label for="yInput">Y:</label>
-<input id="yInput" type="number" min="0" max="76">
+		<label for="xInput">X:</label>
+		<input id="xInput" type="number" min="0" max="776">
 
 
-<button id="submitBtn">Submit Pixel</button>
-</div>
-
-<br>
-Color Chart Reference : <br>
-<img src="./img/colorRef.png" width="500px" height="300px">
-<br>
-Secondary Canvas, assuming the coordinates are octal instead of decimal
-<canvas id="secondaryCanvas" width="511" height="63"></canvas>
-<!-- Supabase JS -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.34.0/dist/umd/supabase.min.js"></script>
-<script>
-const W = 777, H = 77;
-const canvas = document.getElementById("pixelCanvas");
-const ctx = canvas.getContext("2d");
+		<label for="yInput">Y:</label>
+		<input id="yInput" type="number" min="0" max="76">
 
 
-const secondaryCanvas = document.getElementById("secondaryCanvas");
-const sctx = secondaryCanvas.getContext("2d");
-
-const colorSelect = document.getElementById("colorSelect");
-const colorPreview = document.getElementById("colorPreview");
-const xInput = document.getElementById("xInput");
-const yInput = document.getElementById("yInput");
-const submitBtn = document.getElementById("submitBtn");
-
-
-// Fill grey background
-ctx.fillStyle = "#808080";
-ctx.fillRect(0,0,W,H);
-
-sctx.fillStyle = "#808080";
-sctx.fillRect(0,0,W,H);
-
-// Show initial color
-colorPreview.style.backgroundColor = colorSelect.value;
-colorSelect.addEventListener('change', ()=>{
-colorPreview.style.backgroundColor = colorSelect.value;
-});
-
-
-// --- Supabase setup ---
-const SUPABASE_URL = "https://uqsulkecdpzwacktcwut.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxc3Vsa2VjZHB6d2Fja3Rjd3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwOTgxMjEsImV4cCI6MjA3OTY3NDEyMX0.-4safUVuOJayX_D15q1GmPYiHVSzIW2Zmc833o303W8";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-
-// Load all pixels from Supabase
-async function loadPixels() {
-const { data, error } = await supabaseClient.from("pixels").select("*");
-if(error){ console.error(error); return; }
-data.forEach(p => {
-ctx.fillStyle = p.color;
-ctx.fillRect(p.x, p.y, 1, 1);
-});
-}
-loadPixels();
-
-// Secondary canvas: pull pixels, octal -> decimal, draw
-async function loadSecondaryCanvas() {
-    const { data, error } = await supabaseClient.from("pixels").select("*");
-    if(error){ console.error(error); return; }
-    data.forEach(p => {
-        // Convert X/Y from octal string to decimal if stored as octal strings
-        const xDec = parseInt(p.x, 8);
-        const yDec = parseInt(p.y, 8);
-        // Validate bounds
-        if(isNaN(xDec) || isNaN(yDec) || xDec<0||xDec>=W||yDec<0||yDec>=H) return;
-        sctx.fillStyle = p.color;
-        sctx.fillRect(xDec, yDec, 1, 1);
-    });
-}
-loadSecondaryCanvas();
-
-// Submit a pixel using RLS-compatible upsert
-submitBtn.onclick = async () => {
-const x = parseInt(xInput.value);
-const y = parseInt(yInput.value);
-const color = colorSelect.value;
+		<button id="submitBtn">Submit Pixel</button>
+	</div>
+	<!-- Added a little keypad so people can just click the runes instead of manually translating-->
+	<script>
+		function onRunePress(num) {
+			const input = document.getElementById("rune-keypad-number");
+			input.value += num;
+		}
+	</script>
+	<br>
+	If you don't want to translate the runes to numbers yourself, you can use the Rune Keypad™ below:
+	<div class="keaypad-wrapper">
+		<label for="rune-keypad-number">Rune Keypad™:</label>
+		<input type="number" name="rune-keypad-out" id="rune-keypad-number">
+		<div class="rune-keypad">
+			<button onclick="onRunePress(1)"><img src="./img/rune1.png" alt="Rune 1"></button>
+			<button onclick="onRunePress(2)"><img src="./img/rune2.png" alt="Rune 2"></button>
+			<button onclick="onRunePress(3)"><img src="./img/rune3.png" alt="Rune 3"></button>
+			<button onclick="onRunePress(4)"><img src="./img/rune4.png" alt="Rune 4"></button>
+			<button onclick="onRunePress(5)"><img src="./img/rune5.png" alt="Rune 5"></button>
+			<button onclick="onRunePress(6)"><img src="./img/rune6.png" alt="Rune 6"></button>
+			<button onclick="onRunePress(7)"><img src="./img/rune7.png" alt="Rune 7"></button>
+			<button onclick="onRunePress(0)"><img src="./img/rune0.png" alt="Rune 0"></button>
+			<button onclick="document.getElementById('rune-keypad-number').value = ''">Clear</button>
+		</div>
+	</div>
+	<br>
+	Color Chart Reference : <br>
+	<img src="./img/colorRef.png" width="500px" height="300px">
+	<br>
+	Secondary Canvas, assuming the coordinates are octal instead of decimal
+	<canvas id="secondaryCanvas" width="511" height="63"></canvas>
+	<!-- Supabase JS -->
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.34.0/dist/umd/supabase.min.js"></script>
+	<script>
+		const W = 777, H = 77;
+		const canvas = document.getElementById("pixelCanvas");
+		const ctx = canvas.getContext("2d");
 
 
-if(isNaN(x) || isNaN(y) || x<0||x>=W||y<0||y>=H){
-alert("Invalid coordinates");
-return;
-}
+		const secondaryCanvas = document.getElementById("secondaryCanvas");
+		const sctx = secondaryCanvas.getContext("2d");
+
+		const colorSelect = document.getElementById("colorSelect");
+		const colorPreview = document.getElementById("colorPreview");
+		const xInput = document.getElementById("xInput");
+		const yInput = document.getElementById("yInput");
+		const submitBtn = document.getElementById("submitBtn");
 
 
-ctx.fillStyle = color;
-ctx.fillRect(x, y, 1, 1);
+		// Fill grey background
+		ctx.fillStyle = "#808080";
+		ctx.fillRect(0, 0, W, H);
 
+		sctx.fillStyle = "#808080";
+		sctx.fillRect(0, 0, W, H);
 
-// Upsert requires (x,y) as primary key in the table
-const { data, error } = await supabaseClient
-.from("pixels")
-.upsert({ x, y, color }, { onConflict: ['x','y'] });
+		// Show initial color
+		colorPreview.style.backgroundColor = colorSelect.value;
+		colorSelect.addEventListener('change', () => {
+			colorPreview.style.backgroundColor = colorSelect.value;
+		});
 
-
-if(error) console.error("Supabase upsert error:", error);
-};
-
-
-// Optional: subscribe to realtime updates (requires Realtime enabled on table)
-supabaseClient.channel('realtime-pixels')
-.on('postgres_changes', { event: '*', schema: 'public', table: 'pixels' }, payload => {
-const p = payload.new;
-ctx.fillStyle = p.color;
-ctx.fillRect(p.x, p.y, 1, 1);
-}).subscribe();
-</script>
+		/*
+		// --- Supabase setup ---
+		const SUPABASE_URL = "https://uqsulkecdpzwacktcwut.supabase.co";
+		const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxc3Vsa2VjZHB6d2Fja3Rjd3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwOTgxMjEsImV4cCI6MjA3OTY3NDEyMX0.-4safUVuOJayX_D15q1GmPYiHVSzIW2Zmc833o303W8";
+		const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+		
+		
+		// Load all pixels from Supabase
+		async function loadPixels() {
+		const { data, error } = await supabaseClient.from("pixels").select("*");
+		if(error){ console.error(error); return; }
+		data.forEach(p => {
+		ctx.fillStyle = p.color;
+		ctx.fillRect(p.x, p.y, 1, 1);
+		});
+		}
+		loadPixels();
+		
+		// Secondary canvas: pull pixels, octal -> decimal, draw
+		async function loadSecondaryCanvas() {
+			const { data, error } = await supabaseClient.from("pixels").select("*");
+			if(error){ console.error(error); return; }
+			data.forEach(p => {
+				// Convert X/Y from octal string to decimal if stored as octal strings
+				const xDec = parseInt(p.x, 8);
+				const yDec = parseInt(p.y, 8);
+				// Validate bounds
+				if(isNaN(xDec) || isNaN(yDec) || xDec<0||xDec>=W||yDec<0||yDec>=H) return;
+				sctx.fillStyle = p.color;
+				sctx.fillRect(xDec, yDec, 1, 1);
+			});
+		}
+		loadSecondaryCanvas();
+		
+		// Submit a pixel using RLS-compatible upsert
+		submitBtn.onclick = async () => {
+		const x = parseInt(xInput.value);
+		const y = parseInt(yInput.value);
+		const color = colorSelect.value;
+		
+		
+		if(isNaN(x) || isNaN(y) || x<0||x>=W||y<0||y>=H){
+		alert("Invalid coordinates");
+		return;
+		}
+		
+		
+		ctx.fillStyle = color;
+		ctx.fillRect(x, y, 1, 1);
+		
+		
+		// Upsert requires (x,y) as primary key in the table
+		const { data, error } = await supabaseClient
+		.from("pixels")
+		.upsert({ x, y, color }, { onConflict: ['x','y'] });
+		
+		
+		if(error) console.error("Supabase upsert error:", error);
+		};
+		
+		
+		// Optional: subscribe to realtime updates (requires Realtime enabled on table)
+		supabaseClient.channel('realtime-pixels')
+		.on('postgres_changes', { event: '*', schema: 'public', table: 'pixels' }, payload => {
+		const p = payload.new;
+		ctx.fillStyle = p.color;
+		ctx.fillRect(p.x, p.y, 1, 1);
+		}).subscribe();
+		*/
+	</script>
 </body>
+
 </html>
