@@ -30,7 +30,8 @@
 		button {
 			width: 100%;
 			padding: 6px;
-			margin-top: 8px;
+			margin-top: 4px;
+			margin-bottom: 6px;
 			border-radius: 6px;
 			border: 1px solid #555;
 			background: #333;
@@ -121,6 +122,25 @@
 			}
 
 		}
+		#statusMessageField {
+			display: flex;
+			justify-self: center;;
+			border-style: solid;
+			border-color: #fff;
+			background-color: #000;
+			color: #888;
+			width: 80%;
+
+			&.good {
+				color: #0f0;
+			}
+			&.fine {
+				color: #ff0;
+			}
+			&.bad {
+				color: #f00;
+			}
+		}
 	</style>
 </head>
 
@@ -181,6 +201,7 @@
 
 
 		<button id="submitBtn">Submit Pixel</button>
+		<span id="statusMessageField">Submit Status</span>
 	</div>
 	<!-- Added a little keypad so people can just click the runes instead of manually translating-->
 	<script>
@@ -226,6 +247,7 @@
 		const xInput = document.getElementById("xInput");
 		const yInput = document.getElementById("yInput");
 		const submitBtn = document.getElementById("submitBtn");
+		const statusMessageField = document.getElementById("statusMessageField");
 
 
 		// Fill grey background
@@ -293,10 +315,20 @@
 		
 		
 		// Upsert requires (x,y) as primary key in the table
-		const { data, error } = await supabaseClient
+		const { data, error, status} = await supabaseClient
 		.from("pixels")
 		.upsert({ x, y, color }, { onConflict: ['x','y'] });
 		
+		if (status === 200 || status === 201) {
+			statusMessageField.textContent = `Pixel at (${x}, ${y}) submitted successfully!`;
+			statusMessageField.className = "good";
+		} else if ( status === 409 ) {
+			statusMessageField.textContent = `Pixel at (${x}, ${y}) already exists.`;
+			statusMessageField.className = "fine";
+		} else {
+			statusMessageField.textContent = `Error submitting pixel: ${status}`;
+			statusMessageField.className = "bad";
+		}
 		
 		if(error) console.error("Supabase upsert error:", error);
 		};
